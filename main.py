@@ -5,6 +5,7 @@ from engine import get_rostos
 import sqlite3
 import datetime as dt
 from tempo import intervalo_tempo
+import telebot as tb
 
 conn = sqlite3.connect(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento'
                        r'-facial-pca\bd\pca.db')
@@ -23,7 +24,6 @@ while True:
 
         for (top, right, bottom, left), rosto_desconhecido in zip(localizacao_dos_rostos, rosto_desconhecidos):
             resultados = fr.compare_faces(rostos_conhecidos, rosto_desconhecido)
-            print(resultados)
 
             face_distances = fr.face_distance(rostos_conhecidos, rosto_desconhecido)
 
@@ -44,36 +44,47 @@ while True:
             cv2.putText(frame, nome, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
             cv2.imshow('Webcam_facerecognition', frame)
-
-            verificacao = resultados.index(True)
-            identificador = matricula[verificacao]
-            status = cursor.execute(f'''SELECT statusAluno FROM aluno WHERE matricula = "{identificador}"''')
-            for status_atual in cursor.fetchall():
-                status = status_atual[0]
-            wait = cursor.execute(f'''SELECT data FROM registro WHERE matriculaAluno = "{identificador}"''')
-            for pausa in cursor.fetchall():
-                wait = pausa[0]
-            if intervalo_tempo(wait) and status == 'Fora da escola':
+            try:
+                verificacao = resultados.index(True)
+                identificador = matricula[verificacao]
+                status = cursor.execute(f'''SELECT statusAluno FROM aluno WHERE matricula = "{identificador}"''')
+                for status_atual in cursor.fetchall():
+                    status = status_atual[0]
+                wait = cursor.execute(f'''SELECT data FROM registro WHERE matriculaAluno = "{identificador}"''')
+                for pausa in cursor.fetchall():
+                    wait = pausa[0]
                 cpf_responsavel = cursor.execute(f'''SELECT cpfResponsavel FROM aluno
-                 WHERE matricula = "{identificador}"''')
+                                     WHERE matricula = "{identificador}"''')
                 for cpf in cursor.fetchall():
                     cpf_responsavel = cpf[0]
                 nome_aluno = cursor.execute(f'''SELECT nomeAluno FROM aluno
-                                 WHERE matricula = "{identificador}"''')
+                                                     WHERE matricula = "{identificador}"''')
                 for aluno in cursor.fetchall():
                     nome_aluno = aluno[0]
                 sobrenome_aluno = cursor.execute(f'''SELECT sobrenomeAluno FROM aluno
-                                                 WHERE matricula = "{identificador}"''')
+                                                                     WHERE matricula = "{identificador}"''')
                 for sobrenome in cursor.fetchall():
                     sobrenome_aluno = sobrenome[0]
-                cursor.execute(f'''INSERT INTO registro (matriculaAluno, cpfResponsavel, nomeAluno, sobrenomeAluno, 
-                data) VALUES ("{identificador}", "{cpf_responsavel}", "{nome_aluno}", "{sobrenome_aluno}", 
-                "{dt.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")''')
-                cursor.execute(f'''UPDATE aluno SET statusAluno = 'Dentro da escola' WHERE matricula = "{identificador}"''')
-                conn.commit()
-                print('Catraca Liberada')
-            else:
-                print('Entrada já registrada!')
+                if intervalo_tempo(wait) and status == 'Fora da escola':
+                    cursor.execute(f'''INSERT INTO registro (matriculaAluno, cpfResponsavel, nomeAluno, sobrenomeAluno, 
+                    data, direcao) VALUES ("{identificador}", "{cpf_responsavel}", "{nome_aluno}", "{sobrenome_aluno}", 
+                    "{dt.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}", "Entrando")''')
+                    cursor.execute(f'''UPDATE aluno SET statusAluno = 'Dentro da escola' WHERE 
+                    matricula = "{identificador}"''')
+                    conn.commit()
+                    print('Catraca Liberada')
+                elif intervalo_tempo(wait) and status == 'Dentro da escola':
+                    cursor.execute(f'''INSERT INTO registro (matriculaAluno, cpfResponsavel, nomeAluno, sobrenomeAluno, 
+                    data, direcao) VALUES ("{identificador}", "{cpf_responsavel}", "{nome_aluno}", "{sobrenome_aluno}", 
+                    "{dt.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}", "Entrando")''')
+                    cursor.execute(f'''UPDATE aluno SET statusAluno = 'Fora da escola' WHERE 
+                                        matricula = "{identificador}"''')
+                    conn.commit()
+                    print('Catraca Liberada')
+                else:
+                    pass
+            except ValueError:
+                print('Aluno desconhecido!')
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

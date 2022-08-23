@@ -12,6 +12,3 @@ def intervalo_tempo(hora_atual):
         return True
     except ValueError:
         return True
-
-
-print(intervalo_tempo(''))
