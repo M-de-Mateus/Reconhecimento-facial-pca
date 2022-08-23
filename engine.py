@@ -20,15 +20,17 @@ def reconhece_face(url_foto):
 def get_rostos():
     rostos_conhecidos = []
     nomes_dos_rostos = []
+    matricula = []
 
     cursor.execute('''SELECT pathimagem FROM aluno''')
     for i, rosto in enumerate(cursor.fetchall()):
         if rosto not in rostos_conhecidos:
-            print(rosto)
             face = reconhece_face(rosto[0])
             rostos_conhecidos.append(face[1][0])
             cursor.execute(f'''SELECT nomeAluno FROM aluno WHERE pathimagem = "{rosto[0]}"''')
             for c, nome in enumerate(cursor.fetchall()):
                 nomes_dos_rostos.append(nome[c])
-
-    return rostos_conhecidos, nomes_dos_rostos
+            cursor.execute(f'''SELECT matricula FROM aluno WHERE pathimagem = "{rosto[0]}"''')
+            for m, matricula_aluno in enumerate(cursor.fetchall()):
+                matricula.append(matricula_aluno[m])
+    return rostos_conhecidos, nomes_dos_rostos, matricula
