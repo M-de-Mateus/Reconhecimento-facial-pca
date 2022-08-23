@@ -1,4 +1,11 @@
 import face_recognition as fr
+import warnings
+import sqlite3
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+conn = sqlite3.connect(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento'
+                       r'-facial-pca\bd\pca.db')
+cursor = conn.cursor()
 
 
 def reconhece_face(url_foto):
@@ -14,19 +21,14 @@ def get_rostos():
     rostos_conhecidos = []
     nomes_dos_rostos = []
 
-    roger1 = reconhece_face(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento-facial-pca\Imagens\roger1.jpg')
-    if roger1[0]:
-        rostos_conhecidos.append(roger1[1][0])
-        nomes_dos_rostos.append("Roger")
-
-    romulo1 = reconhece_face(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento-facial-pca\Imagens\romulo1.jpg')
-    if romulo1[0]:
-        rostos_conhecidos.append(romulo1[1][0])
-        nomes_dos_rostos.append("Romulo")
-
-    mateus1 = reconhece_face(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento-facial-pca\Imagens\Mateus.jpg')
-    if romulo1[0]:
-        rostos_conhecidos.append(mateus1[1][0])
-        nomes_dos_rostos.append("Mateus")
+    cursor.execute('''SELECT pathimagem FROM aluno''')
+    for i, rosto in enumerate(cursor.fetchall()):
+        if rosto not in rostos_conhecidos:
+            print(rosto)
+            face = reconhece_face(rosto[0])
+            rostos_conhecidos.append(face[1][0])
+            cursor.execute(f'''SELECT nomeAluno FROM aluno WHERE pathimagem = "{rosto[0]}"''')
+            for c, nome in enumerate(cursor.fetchall()):
+                nomes_dos_rostos.append(nome[c])
 
     return rostos_conhecidos, nomes_dos_rostos
