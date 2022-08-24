@@ -1,10 +1,10 @@
-import face_recognition as fr
-import warnings
+import os
 import sqlite3
+import warnings
+import face_recognition as fr
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
-conn = sqlite3.connect(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento'
-                       r'-facial-pca\bd\pca.db')
+conn = sqlite3.connect(os.path.relpath(r'bd\pca.db'))
 cursor = conn.cursor()
 
 
