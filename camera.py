@@ -1,15 +1,16 @@
-import numpy as np
-import face_recognition as fr
+import os
 import cv2
 import sqlite3
+import numpy as np
 import datetime as dt
+import face_recognition as fr
+from notificacao import main
 from engine import get_rostos
 from tempo import intervalo_tempo
-from notificacao import main
 
-conn = sqlite3.connect(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento'
-                       r'-facial-pca\bd\pca.db')
+conn = sqlite3.connect(os.path.relpath(r'bd\pca.db'))
 cursor = conn.cursor()
+
 rostos_conhecidos, nomes_dos_rostos, matricula = get_rostos()
 
 
