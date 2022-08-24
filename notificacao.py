@@ -1,11 +1,13 @@
-import telebot as tb
+import os
 import sqlite3
+import telebot as tb
 
-
-bd = r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento-facial-pca\bd\pca.db'
-
-chave_api = 'TOKEN'
+with open(os.path.relpath(r'C:\Users\Mateu\Desktop\token.txt'), 'r', encoding='utf-8') as token:
+    chave = token.read()
+chave_api = chave
 bot = tb.TeleBot(chave_api)
+
+bd = os.path.relpath(r'bd\pca.db')
 
 
 def main():
