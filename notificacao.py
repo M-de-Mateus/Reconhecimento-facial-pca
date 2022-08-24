@@ -4,7 +4,7 @@ import sqlite3
 
 bd = r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento-facial-pca\bd\pca.db'
 
-chave_api = '5657476175:AAFWJjKyVwWBDzeP067ocExbPf2cPnQidaI'
+chave_api = 'TOKEN'
 bot = tb.TeleBot(chave_api)
 
 
