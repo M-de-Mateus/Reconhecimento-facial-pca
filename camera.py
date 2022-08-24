@@ -1,11 +1,11 @@
 import numpy as np
 import face_recognition as fr
 import cv2
-from engine import get_rostos
 import sqlite3
 import datetime as dt
+from engine import get_rostos
 from tempo import intervalo_tempo
-import notificacao
+from notificacao import main
 
 conn = sqlite3.connect(r'C:\Users\Mateu\Desktop\pastas\github\Reconhecimento-facial-pca\M-de-Mateus\Reconhecimento'
                        r'-facial-pca\bd\pca.db')
@@ -88,7 +88,7 @@ while True:
             except ValueError:
                 print('Aluno desconhecido!')
 
-        notificacao.main()
+        main()
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
