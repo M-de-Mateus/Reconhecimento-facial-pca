@@ -28,23 +28,23 @@ def main():
     cursor.execute('''SELECT statusAluno, cpfResponsavel, nomeAluno, matricula FROM aluno''')
     # percorre o objeto retornado pela consulta
     for query in cursor.fetchall():
-        # tenta executar o primeiro bloco
-        try:
-            # condição 1 == 'chegada'
-            # status do aluno está como 'chegada'
-            # query[0] == statusAluno
-            if query[0] == 'chegada':
-                # seleciona a data do ultimo status do aluno no bd
-                cursor.execute(f'''SELECT max(data) FROM registro WHERE matriculaAluno = "{query[3]}"''')
-                for horario in cursor.fetchall():
-                    # armazena a data na variavel
-                    date = horario[0]
-                    # separa a data e a hora
-                    data, hora = date.split(' ', 1)
-                # seleciona o id do chat do telegram do pai do aluno
-                cursor.execute(f'''SELECT idChatResponsavel FROM responsavel WHERE cpfResponsavel = "{query[1]}"''')
-                for chat in cursor.fetchall():
-                    idchat = chat[0]
+        # condição 1 == 'chegada'
+        # status do aluno está como 'chegada'
+        # query[0] == statusAluno
+        if query[0] == 'chegada':
+            # seleciona a data do ultimo status do aluno no bd
+            cursor.execute(f'''SELECT max(data) FROM registro WHERE matriculaAluno = "{query[3]}"''')
+            for horario in cursor.fetchall():
+                # armazena a data na variavel
+                date = horario[0]
+                print(date)
+                # separa a data e a hora
+                data, hora = date.split(' ', 1)
+            # seleciona o id do chat do telegram do pai do aluno
+            cursor.execute(f'''SELECT idChatResponsavel FROM responsavel WHERE cpfResponsavel = "{query[1]}"''')
+            for chat in cursor.fetchall():
+                idchat = chat[0]
+            if idchat != 0 and idchat is not None:
                 # envia a mensagem para o pai do aluno
                 bot.send_message(int(idchat), f'Seu filho {query[2]} acaba de chegar na escola! '
                                               f'Dia {data} às {hora}')
@@ -52,26 +52,29 @@ def main():
                 cursor.execute(f'''UPDATE aluno SET statusAluno = "Dentro da escola" WHERE cpfResponsavel = 
                                 "{query[1]}"''')
                 conn.commit()
-            # condição 1 == 'saida'
-            # status do aluno está como 'saida'
-            # repete o mesmo processo descrito acima, porém envia uma mensagem notificando a saida do aluno da escola
-            # ao final, muda o status do aluno para 'Fora da escola'
-            elif query[0] == 'saida':
-                cursor.execute(f'''SELECT max(data) FROM registro WHERE matriculaAluno = "{query[3]}"''')
-                for horario in cursor.fetchall():
-                    date = horario[0]
-                    data, hora = date.split(' ', 1)
-                cursor.execute(f'''SELECT idChatResponsavel FROM responsavel WHERE cpfResponsavel = "{query[1]}"''')
-                for chat in cursor.fetchall():
-                    idchat = chat[0]
+            else:
+                # O que ocorre quando o cadastro não é ativado
+                print('cadastro não ativado!')
+        # condição 1 == 'saida'
+        # status do aluno está como 'saida'
+        # repete o mesmo processo descrito acima, porém envia uma mensagem notificando a saida do aluno da escola
+        # ao final, muda o status do aluno para 'Fora da escola'
+        elif query[0] == 'saida':
+            cursor.execute(f'''SELECT max(data) FROM registro WHERE matriculaAluno = "{query[3]}"''')
+            for horario in cursor.fetchall():
+                date = horario[0]
+                data, hora = date.split(' ', 1)
+            cursor.execute(f'''SELECT idChatResponsavel FROM responsavel WHERE cpfResponsavel = "{query[1]}"''')
+            for chat in cursor.fetchall():
+                idchat = chat[0]
+            if idchat != 0 and idchat is not None:
                 bot.send_message(int(idchat), f'Seu filho {query[2]} acaba de sair da escola! Dia {data} às {hora}')
                 cursor.execute(
                     f'''UPDATE aluno SET statusAluno = "Fora da escola" WHERE cpfResponsavel = "{query[1]}"''')
                 conn.commit()
-        # ValueError será retornado quando não houver id do chat do pai do aluno ou quando ele for 0
-        # O que ocorre quando o cadastro não é ativado
-        except ValueError:
-            print('cadastro não ativado!')
+            else:
+                # O que ocorre quando o cadastro não é ativado
+                print('cadastro não ativado!')
     # fecha a conexão com o banco de dados
     conn.close()
 
